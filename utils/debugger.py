@@ -100,7 +100,6 @@ def writer_region_inner_similarity(tensor, subgroup, name, dim=-1, group='[regio
     diag = torch.eye(sim.size(1), device=tensor.device)
     non_diag = (~diag.bool()).int()
     sim_ = sim_region_score * non_diag
-    # 对于某一张最匹配的图片 其中最值为1？
     score = sim_.max(dim=-1)[0].mean()
 
     writer('add_scalars',

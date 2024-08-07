@@ -2,7 +2,6 @@
 """
 Created on Wed May 18 15:57:58 2022
 
-@author: chenkq
 """
 import ipdb
 import torch
@@ -54,7 +53,6 @@ def get_negative_mask_(batchsize: int, neg: int = None, device='cpu'):
     msk = ~msk.bool()
     msk = msk.float()
     return msk
-#TODO 对于同样的label一起更新
 
 class ConLoss(nn.Module):
     def __init__(self, confidence, conf_ema_m=0.99, hard=True, temperature=0.07, base_temperature=1., no_contrastive=False, neg_num=None, args=None):
@@ -63,7 +61,6 @@ class ConLoss(nn.Module):
         self.n, self.q, self.k = confidence.shape
         self.confidence = confidence
         self.conf_ema_m = conf_ema_m
-        # 手动置数
         self.hard = hard
         self.temperature = temperature
         # if args.var_t:
@@ -172,7 +169,6 @@ class ConLoss(nn.Module):
             'loss': loss,
             'atten': output if return_atten else None,
             'logit': logit if return_logit else None,
-            # 本轮的pseudo_label
             'target': pseudo_target if return_target else None,
             'score': conf if return_score else None,
             'temperature': self.temperature
@@ -186,7 +182,6 @@ class ConLoss_ori(nn.Module):
         self.n, self.q, self.k = confidence.shape
         self.confidence = confidence
         self.conf_ema_m = conf_ema_m
-        # 手动置数
         self.hard = hard
         self.temperature = temperature
         self.base_temperature = base_temperature
@@ -297,7 +292,6 @@ class ConLoss_ori(nn.Module):
             'loss': loss,
             'atten': output if return_atten else None,
             'logit': logit if return_logit else None,
-            # 本轮的pseudo_label
             'target': pseudo_target if return_target else None,
             'score': conf if return_score else None,
             'temperature': self.temperature
@@ -320,7 +314,6 @@ class ConLossCoLabel(nn.Module):
         self.n, self.q, self.k = confidence.shape
         self.confidence = confidence
         self.conf_ema_m = conf_ema_m
-        # 手动置数
         self.hard = hard
         self.temperature = temperature
         self.base_temperature = base_temperature
@@ -419,7 +412,6 @@ class ConLossCoLabel(nn.Module):
             'loss': loss,
             'atten': output if return_atten else None,
             'logit': logit if return_logit else None,
-            # 本轮的pseudo_label
             'target': pseudo_target if return_target else None,
             'score': conf if return_score else None,
             'temperature': self.temperature
@@ -502,7 +494,6 @@ class ConLossMask(ConLoss):
             'loss': loss,
             'atten': output if return_atten else None,
             'logit': logit if return_logit else None,
-            # 本轮的pseudo_label
             'target': pseudo_target if return_target else None,
             'score': conf if return_score else None,
             'temperature': self.temperature
@@ -522,7 +513,6 @@ class WSLoss(nn.Module):
         self.k = 100
         self.conf_ema_m = conf_ema_m
         # self.RMmodel = pseudo_generator
-        # 手动置数
         self.hard = hard
         self.temperature = temperature
         self.base_temperature = base_temperature
@@ -595,7 +585,6 @@ class WSLoss(nn.Module):
             'loss': loss,
             'atten': output if return_atten else None,
             'logit': logit if return_logit else None,
-            # 本轮的pseudo_label
             'target': pseudo_target if return_target else None,
             'score': conf if return_score else None,
             'temperature': self.temperature

@@ -1,5 +1,3 @@
-#!/home/LAB/chenkq/anaconda3/envs/torch/bin/python
-
 
 # ==================================================================================================================== #
 #                                           make slrum work with local import                                          #
@@ -55,13 +53,13 @@ parser.add_argument('--conf_ema_range', default='0.95,0.8', type=str,
                     help='pseudo target updating coefficient (phi)')
 
 parser.add_argument('--task', default='phrase')
-parser.add_argument('--glove_file', default='/home/LAB/chenkq/data/glove/glove.6B.300d.txt')
-parser.add_argument('--dataroot', default='/home/LAB/chenkq/data/flickr30k_entities')
-parser.add_argument('--referoot', default='/home/LAB/chenkq/referring_expression/data')
-parser.add_argument('--boxfile', default='/home/LAB/chenkq/data/flickr30k/objects_vocab.txt')
-parser.add_argument('--features_path', default='/home/LAB/chenkq/data/volta/')
+parser.add_argument('--glove_file', default='')
+parser.add_argument('--dataroot', default='')
+parser.add_argument('--referoot', default='')
+parser.add_argument('--boxfile', default='')
+parser.add_argument('--features_path', default='')
 parser.add_argument('--dataset_name', default='refcoco+')
-parser.add_argument('--mat_root', default='/home/LAB/chenkq/Multimodal-Alignment-Framework/data/flickr30k')
+parser.add_argument('--mat_root', default='')
 
 parser.add_argument('--batch_size', default=256, type=int)
 parser.add_argument('--num_workers', default=2, type=int)
@@ -238,8 +236,6 @@ def main_worker(args):
         optimizer = torch.optim.SGD(model_parameters, args.lr,
                                      momentum=args.momentum,
                                      weight_decay=args.weight_decay)
-        #optimizer = torch.optim.Adam(model_parameters, args.lr,
-         #                   weight_decay=args.weight_decay)
     else:
         optimizer = torch.optim.SGD(model.parameters(), args.lr,
                                     momentum=args.momentum,
@@ -290,21 +286,6 @@ def main_worker(args):
     region_confidence = len2mask(train_loader.dataset.num_obj, (n, max_region_num)).float() / train_loader.dataset.num_obj.unsqueeze(-1)
     confidence = einsum('b q, b k -> b q k', phrase_mask, region_confidence)
 
-    # breakpoint()
-
-    # if args.gpu is not None:
-    #     confidence = confidence.cuda()
-
-    # breakpoint()
-    # set loss functions (with pseudo-targets maintained)
-    # loss_fn = ConLossMask(confidence,
-    #                   conf_ema_m=args.conf_ema_range[0],
-    #                   hard=args.hard,
-    #                   temperature=args.temperature,
-    #                   base_temperature=args.base_temperature,
-    #                   no_contrastive=args.no_contrastive,
-    #                   neg_num=args.neg_num,
-    #                   args=args)
 
     loss_fn = WSLoss(conf_ema_m=args.conf_ema_range[0],
                       hard=args.hard,
@@ -330,8 +311,6 @@ def main_worker(args):
             target_topk = None
         train(model, train_loader, loss_fn, optimizer, epoch, args, args.writer, update_conf=update_conf,
               target_topk=target_topk, device=args.device, glove_tk=gloveTokenizer)
-        # loss_fn.set_conf_ema_m(epoch, args)
-        # eval
         acc_eval = val(model, eval_loader, args, epoch, args.writer, device=args.device, prefix='eval')
         if isinstance(test_loader, list):
             acc_test = []
@@ -340,7 +319,6 @@ def main_worker(args):
                 acc_test.append(acc_dl)
         else:
             acc_test = val(model, test_loader, args, epoch, args.writer, device=args.device, prefix='test')
-        # log
         # mmc = loss_fn.confidence.amax(dim=-1).sum() / train_loader.dataset.num_phrase.sum()
         mmc = 0
         with open(os.path.join(args.exp_dir, 'result.log'), 'a+') as f:
@@ -438,15 +416,6 @@ def train(model, train_loader, loss_cont_fn, optimizer, epoch, args, writer, upd
         pseudo_tgt = pseudo_tgt / p_t
         pseudo_tgt = torch.softmax(pseudo_tgt, dim=-1)
 
-        # print(pseudo_tgt._version) #1
-        # pseudo_tgt = rearrange(pseudo_tgt, 'b q k -> b (q k)',b=atten.shape[0], q=phrase_mask.shape[1], k=region_mask.shape[-1])
-        # print(pseudo_tgt_._version) #1
-        # print(pseudo_tgt_._version) #0
-        # pseudo_tgt = rearrange(pseudo_tgt, 'b (q k) -> b q k',b=atten.shape[0], q=phrase_mask.shape[1], k=region_mask.shape[-1])
-        # print(pseudo_tgt._version)  #0
-        # pseudo_tgt = pseudo_tgt / args.p_temperature
-        # breakpoint()
-        # loss
         if args.mask == "duplicate":
             # print("duplicate mask!")
             mask = get_duplicate_mask(image_id=image_id, output=atten)
@@ -468,13 +437,10 @@ def train(model, train_loader, loss_cont_fn, optimizer, epoch, args, writer, upd
         
         tst = time.time()
         from flow.inner_similarity import get_mask_similarity_matrix_by_threshold
-        # TODO 这里填充完INF后会影响到后面的转换为正例的情况 sum(-INF)
         norm_mix_features_pad = mix_features_pad / (mix_features_pad.norm(dim=-1, keepdim=True) + feps(phrase.dtype))
         region_similarity = torch.einsum('b q d, a k d -> b a q k',norm_mix_features_pad, norm_mix_features_pad)
         atten, origin_attn, inner_mask = get_mask_similarity_matrix_by_threshold(region_similarity, atten, args.threshold,
                                                                                    -torch.finfo(atten.dtype).max, atten.device)
-        # loss_prefix = converting(inner_mask, origin_attn)
-
         ted = time.time()
         mask_time.update(ted-tst)
 
@@ -659,7 +625,6 @@ def soft_init(model, train_loader, args, loss_cont_fn, writer, device='cuda'):
 
         
         # loss_cont_fn.confidence_update(conf, index, x_mask, hard=False, conf_ema_m=0.)
-        #将初始的label-phrase相似度置为初始化
         loss_cont_fn.set_batch_confidence(conf_0, index)
         # breakpoint()
         acc1, acc5 = accuracy(conf, boxes_ori_tensor, union_ref_boxes, phrase_mask, topk=(1, 5))

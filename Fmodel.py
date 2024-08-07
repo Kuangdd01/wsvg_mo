@@ -24,16 +24,12 @@ class groundingbox(object):
 
 def cropped_image(img_path: str, box: list):
     try:
-    # 尝试读取图像
-        img = cv2.imread(img_path)
-    # 检查是否成功读取图像（img 不为 None 表示成功）
         if img is not None:
             pass
         else:
             print("Failed to read the image. Check the file path.")
             raise TypeError
     except Exception as e:
-    # 捕获异常并输出错误信息
         print(f"An error occurred: {e}")
     x_min, y_min, x_max, y_max = box
     x_min, y_min, x_max, y_max = int(x_min), int(y_min), int(x_max), int(y_max)
@@ -45,7 +41,7 @@ def cropped_image(img_path: str, box: list):
 if __name__ == "__main__":
     # img_id = "2425411995"
     # boxes = [[8, 241, 389, 499], [5, 221, 389, 499], [93, 164, 131, 205]]
-    # flickr_root = "/home/LAB/chenkq/data/flickr30k/flickr30k-images/"
+    # flickr_root = "your_root"
     # img = cv2.imread(flickr_root + img_id + ".jpg")
     # box = boxes[0]
     # x_min, y_min, x_max, y_max = box
@@ -79,7 +75,7 @@ if __name__ == "__main__":
         gb = groundingbox(box,sim,img_id,phrases)
         groundingbox_list.append(gb)
 
-    flickr_root = "/home/LAB/chenkq/data/flickr30k/flickr30k-images/"
+    flickr_root = "your_root"
     groundingbox_list = sorted(groundingbox_list, key=lambda x: x.sim, reverse=True)
 
     t1 = time.time()

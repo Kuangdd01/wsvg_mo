@@ -1,5 +1,3 @@
-#!/home/LAB/chenkq/anaconda3/envs/torch/bin/python
-
 
 # ==================================================================================================================== #
 #                                           make slrum work with local import                                          #
@@ -50,13 +48,13 @@ parser.add_argument('--conf_ema_range', default='0.95,0.8', type=str,
                     help='pseudo target updating coefficient (phi)')
 
 parser.add_argument('--task', default='phrase')
-parser.add_argument('--glove_file', default='/home/LAB/chenkq/data/glove/glove.6B.300d.txt')
-parser.add_argument('--dataroot', default='/home/LAB/chenkq/data/flickr30k_entities')
-parser.add_argument('--referoot', default='/home/LAB/chenkq/referring_expression/data')
-parser.add_argument('--boxfile', default='/home/LAB/chenkq/data/flickr30k/objects_vocab.txt')
-parser.add_argument('--features_path', default='/home/LAB/chenkq/data/volta/')
+parser.add_argument('--glove_file', default='')
+parser.add_argument('--dataroot', default='')
+parser.add_argument('--referoot', default='')
+parser.add_argument('--boxfile', default='')
+parser.add_argument('--features_path', default='/')
 parser.add_argument('--dataset_name', default='refcoco+')
-parser.add_argument('--mat_root', default='/home/LAB/chenkq/Multimodal-Alignment-Framework/data/flickr30k')
+parser.add_argument('--mat_root', default='')
 
 parser.add_argument('--batch_size', default=256, type=int)
 parser.add_argument('--num_workers', default=0, type=int)

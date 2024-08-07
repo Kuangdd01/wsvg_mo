@@ -18,7 +18,7 @@ def get_inner_similarity(region_feature: torch.Tensor, temperature):
 def image_io(image_id, preprocess, device="cpu"):
     from PIL import Image
     tensor_list = []
-    flickr_image_root = "/home/LAB/chenkq/data/flickr30k/flickr30k-images/"
+    flickr_image_root = "your_root"
     image_path_list = [flickr_image_root + str(img) + ".jpg" for img in image_id]
     for path in image_path_list:
         image = Image.open(path).convert('RGB')
@@ -67,14 +67,6 @@ def get_mask_similarity_matrix_by_threshold(inner_sim: torch.Tensor,
     atten.masked_fill_(atten_mask, fill_value)
     return atten, atten_back, atten_mask
 
-    # # TODO 复杂度较高
-    # for pos in position_tensor:
-    #     a, b, c, d = pos.cpu().tolist()
-    #     atten_mask[a,b,:,d] = True
-    #     atten_mask[b,a,:,c] = True
-    # atten.masked_fill_(atten_mask, fill_value)
-    # # TODO 存在一些问题 原来padding的地方是不是-inf还没确定，需要打个断点看一下loss的变化情况
-    # return atten
     
 # TODO 
 """
@@ -139,7 +131,7 @@ def converting(atten_mask: torch.Tensor, origin_atten: torch.Tensor,
     
     msk_output = rearrange(msk_output, 'b q (a k) -> b q a k',b=b, q=q, a=a, k=k)
     atten_mask = rearrange(atten_mask, 'b a q k -> b q a k',b=b, q=q, a=a, k=k)
-    msk_output = msk_output * atten_mask #[b q b k] #那些被mask的logsoft qk相似度
+    msk_output = msk_output * atten_mask #[b q b k] 
     
     # import ipdb
     # ipdb.set_trace()
@@ -186,9 +178,3 @@ def converting(atten_mask: torch.Tensor, origin_atten: torch.Tensor,
 #TODO concatenate the negative samples to origin positive samples := converted_pseudo_weight has some issues.
 #TODO test this workaround
 
-#TODO MASK NEGATIVE AND CONVERTING POSITIVE WITH DIFFERENT THRESHOLD
-"""
-修改mask的两种策略；
-把converted_pseudo_weight的计算方式修改一下
-LOSS = LOSS(masked negative samples) + alpha(Loss(converted samples)) alpha为惩罚系数
-"""

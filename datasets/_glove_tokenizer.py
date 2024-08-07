@@ -84,7 +84,6 @@ class bertTokenizer:
         )
 
 if __name__ == '__main__':
-    fn = "/home/LAB/chenkq/data/glove/glove.6B.300d.txt"
     gtk = build_glove_vocab(fn)
     idx2word = {idx: word for word, idx in gtk.vocab.items()}
     import ipdb
